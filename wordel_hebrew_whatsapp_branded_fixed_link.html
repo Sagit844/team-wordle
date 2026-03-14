@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>מילת הבוקר – משחק צוות ממותג</title>
+  <style>
+    :root {
+      --bg1: #f7f9ff;
+      --bg2: #eef3fb;
+      --card: #ffffff;
+      --text: #1d2433;
+      --muted: #667085;
+      --line: #d9e1ef;
+      --brand: #5b67ff;
+      --brand-soft: #eef0ff;
+      --brand-strong: #3440d5;
+      --green: #6aaa64;
+      --yellow: #c9b458;
+      --gray: #7d8596;
+      --empty: #ffffff;
+      --shadow: 0 20px 45px rgba(24,39,75,.10);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(91,103,255,.12), transparent 28%),
+        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+    }
+
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 20px 14px 40px;
+    }
+
+    .shell {
+      background: var(--card);
+      border-radius: 32px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(217,225,239,.9);
+      overflow: hidden;
+    }
+
+    .hero {
+      padding: 24px 20px 18px;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 14%, white) 0%, #ffffff 55%, color-mix(in srgb, var(--brand) 8%, white) 100%);
+      border-bottom: 1px solid #edf1f7;
+    }
+
+    .brandline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .brandbox {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .badge {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-strong) 100%);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      font-weight: 900;
+      box-shadow: 0 10px 24px rgba(91,103,255,.28);
+      flex: 0 0 auto;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,.7);
+      border: 1px solid rgba(255,255,255,.8);
+      color: var(--brand-strong);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 34px;
+      line-height: 1.05;
+    }
+
+    .teamTitle {
+      font-size: 15px;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .heroBottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: rgba(255,255,255,.92);
+      border: 1px solid #e7ebf5;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .cardSection {
+      background: #fff;
+      border: 1px solid #eef2f8;
+      border-radius: 24px;
+      padding: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(56px, 1fr));
+      gap: 8px;
+      max-width: 380px;
+      margin: 0 auto 18px;
+    }
+
+    .tile {
+      aspect-ratio: 1 / 1;
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 900;
+      background: var(--empty);
+      user-select: none;
+      transition: transform .15s ease, background .2s ease, border-color .2s ease;
+    }
+
+    .tile.filled { border-color: #b5bfd2; }
+    .tile.correct { background: var(--green); border-color: var(--green); color: white; }
+    .tile.present { background: var(--yellow); border-color: var(--yellow); color: white; }
+    .tile.absent { background: var(--gray); border-color: var(--gray); color: white; }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin: 0 auto 14px;
+      max-width: 380px;
+    }
+
+    input[type="text"], input[type="date"], input[type="color"] {
+      width: 100%;
+      border: 1px solid #d8dfea;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 17px;
+      outline: none;
+      background: #fff;
+    }
+
+    input[type="text"] { text-align: center; letter-spacing: 1px; }
+    input:focus, textarea:focus {
+      border-color: color-mix(in srgb, var(--brand) 58%, white);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 16%, white);
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      background: var(--brand);
+      color: white;
+    }
+
+    button.secondary { background: var(--brand-soft); color: var(--brand-strong); }
+    button.ghost { background: #f4f6fa; color: #2a3347; }
+    button.danger { background: #fff2f2; color: #a82d2d; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+
+    .msg {
+      min-height: 24px;
+      text-align: center;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .kbd { display: grid; gap: 8px; max-width: 560px; margin: 0 auto; }
+    .krow { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+    .key {
+      min-width: 42px;
+      padding: 12px 10px;
+      border-radius: 12px;
+      background: #e7ebf3;
+      color: #2a3347;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .key.wide { min-width: 90px; }
+    .key.correct { background: var(--green); color: white; }
+    .key.present { background: var(--yellow); color: white; }
+    .key.absent { background: var(--gray); color: white; }
+
+    details {
+      margin-top: 18px;
+      border-top: 1px solid #ebeff6;
+      padding-top: 16px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .admin {
+      display: grid;
+      gap: 12px;
+    }
+
+    .row2, .row3 {
+      display: grid;
+      gap: 10px;
+    }
+
+    .row2 { grid-template-columns: 1fr 1fr; }
+    .row3 { grid-template-columns: 1.3fr 1fr .7fr; }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      border-radius: 14px;
+      border: 1px solid #d8dfea;
+      padding: 12px 14px;
+      font-size: 14px;
+      resize: vertical;
+      direction: ltr;
+      background: #fff;
+    }
+
+    .help, .tiny { color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .resultBox {
+      margin-top: 16px;
+      background: linear-gradient(180deg, #fbfcff 0%, #f5f8ff 100%);
+      border: 1px solid #e2e8f2;
+      border-radius: 18px;
+      padding: 14px;
+      display: none;
+    }
+
+    .resultBox.show { display: block; }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: pre-wrap;
+      background: #fff;
+      border: 1px solid #e2e8f2;
+      border-radius: 14px;
+      padding: 12px;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .miniBrand {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid #edf1f7;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .miniDot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--brand);
+      display: inline-block;
+    }
+
+    .fieldLabel {
+      font-size: 13px;
+      font-weight: 800;
+      color: #4a5568;
+      margin-bottom: 6px;
+    }
+
+    .fieldWrap {
+      min-width: 0;
+    }
+
+    @media (max-width: 700px) {
+      .row3, .row2 { grid-template-columns: 1fr; }
+      .content, .hero { padding: 16px; }
+      h1 { font-size: 29px; }
+      .grid, .input-row { max-width: 100%; }
+      .tile { font-size: 28px; }
+      .badge { width: 48px; height: 48px; font-size: 24px; border-radius: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="shell">
+      <div class="hero">
+        <div class="brandline">
+          <div class="brandbox">
+            <div class="badge" id="brandBadge">🚀</div>
+            <div>
+              <div class="teamTitle" id="teamNameTop">שם הצוות שלך</div>
+              <h1 id="gameTitle">מילת הבוקר</h1>
+              <div class="sub" id="teamTagline">משחק צוות יומי, מהיר וממכר</div>
+            </div>
+          </div>
+          <div class="eyebrow">5 אותיות · 6 ניסיונות · שיתוף לקבוצה</div>
+        </div>
+
+        <div class="heroBottom">
+          <div class="stats">
+            <div class="pill">📅 <span id="gameDateLabel">—</span></div>
+            <div class="pill">⏱ <span id="timer">00:00</span></div>
+            <div class="pill">🎯 <span id="guessCount">0</span>/6</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="cardSection">
+          <div id="setupNotice" class="msg"></div>
+
+          <div class="grid" id="grid"></div>
+
+          <div class="input-row">
+            <input id="guessInput" type="text" maxlength="5" inputmode="text" placeholder="הקלידו מילה בת 5 אותיות" autocomplete="off" />
+            <button id="guessBtn">נחש</button>
+          </div>
+
+          <div class="msg" id="message"></div>
+          <div class="kbd" id="keyboard"></div>
+
+          <div class="resultBox" id="resultBox">
+            <div class="miniBrand"><span class="miniDot"></span><span id="shareBrandLabel">מותג הצוות</span></div>
+            <div style="font-weight:900; margin-bottom:8px;">התוצאה מוכנה לשיתוף בקבוצה</div>
+            <div class="mono" id="shareText"></div>
+            <div class="actions" style="margin-top:10px;">
+              <button id="copyBtn">העתק תוצאה</button>
+              <button id="shareBtn" class="secondary">שתף</button>
+              <button id="resetBtn" class="ghost">משחק חדש באותו קישור</button>
+            </div>
+          </div>
+        </div>
+
+        <details>
+          <summary>אזור מנהל — מיתוג + מילת היום + קישור</summary>
+          <div class="admin">
+            <div class="help">כאן אתה קובע פעם אחת את מיתוג הצוות שלך, ואז בכל בוקר רק מזין מילה חדשה ומייצר קישור לווטסאפ.</div>
+
+            <div class="row3">
+              <div class="fieldWrap">
+                <div class="fieldLabel">שם הצוות</div>
+                <input id="brandTeamName" type="text" placeholder="למשל: צוות מכירות דרום" />
+              </div>
+              <div class="fieldWrap">
+                <div class="fieldLabel">סלוגן קצר</div>
+                <input id="brandTagline" type="text" placeholder="למשל: מתחילים את היום חד" />
+              </div>
+              <div class="fieldWrap">
+                <div class="fieldLabel">אימוג'י/סמל</div>
+                <input id="brandEmoji" type="text" maxlength="2" placeholder="🚀" />
+              </div>
+            </div>
+
+            <div class="row2">
+              <div class="fieldWrap">
+                <div class="fieldLabel">צבע מוביל</div>
+                <input id="brandColor" type="color" value="#5b67ff" />
+              </div>
+              <div class="fieldWrap">
+                <div class="fieldLabel">כותרת המשחק</div>
+                <input id="brandGameTitle" type="text" placeholder="מילת הבוקר" />
+              </div>
+            </div>
+
+            <div class="actions">
+              <button id="saveBrandBtn">שמור מיתוג</button>
+              <button id="resetBrandBtn" class="ghost">אפס מיתוג</button>
+            </div>
+
+            <div class="row2">
+              <input id="adminWord" type="text" maxlength="5" placeholder="מילת היום (5 אותיות)" />
+              <input id="adminDate" type="date" />
+            </div>
+
+            <div class="fieldWrap">
+              <div class="fieldLabel">כתובת בסיס ציבורית למשחק</div>
+              <input id="publicBaseUrl" type="text" placeholder="למשל: https://your-team-game.netlify.app/wordel_hebrew_whatsapp_branded.html" />
+              <div class="tiny">חשוב: קישור שעובד בווטסאפ חייב להיות כתובת אינטרנט ציבורית. אם פותחים את הקובץ מקומית, אי אפשר לייצר קישור ציבורי מתוך file://</div>
+            </div>
+
+            <div class="actions">
+              <button id="buildLinkBtn">צור קישור למשחק</button>
+              <button id="copyLinkBtn" class="secondary">העתק קישור</button>
+              <button id="copyWhatsappMsgBtn" class="ghost">העתק הודעת ווטסאפ</button>
+            </div>
+
+            <textarea id="generatedLink" placeholder="כאן יופיע הקישור"></textarea>
+            <textarea id="generatedWhatsapp" placeholder="כאן תופיע הודעת ווטסאפ מוכנה"></textarea>
+            <div class="tiny">המיתוג נשמר בדפדפן של מי שמייצר את הקישורים. המילה עדיין מקודדת בתוך הלינק בצורה בסיסית, כך שזה נוח ומהיר אבל לא אבטחה מלאה.</div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MAX_GUESSES = 6;
+    const WORD_LEN = 5;
+    const HEBREW_RE = /^[\u0590-\u05FF]{5}$/;
+    const FINAL_MAP = { 'ך':'כ', 'ם':'מ', 'ן':'נ', 'ף':'פ', 'ץ':'צ' };
+    const BRAND_KEY = 'hebrew-wordel-brand-v2';
+    const SETTINGS_KEY = 'hebrew-wordel-settings-v1';
+
+    const gridEl = document.getElementById('grid');
+    const messageEl = document.getElementById('message');
+    const timerEl = document.getElementById('timer');
+    const guessCountEl = document.getElementById('guessCount');
+    const guessInput = document.getElementById('guessInput');
+    const guessBtn = document.getElementById('guessBtn');
+    const keyboardEl = document.getElementById('keyboard');
+    const resultBox = document.getElementById('resultBox');
+    const shareTextEl = document.getElementById('shareText');
+    const gameDateLabel = document.getElementById('gameDateLabel');
+    const setupNotice = document.getElementById('setupNotice');
+
+    const adminWord = document.getElementById('adminWord');
+    const adminDate = document.getElementById('adminDate');
+    const buildLinkBtn = document.getElementById('buildLinkBtn');
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
+    const copyWhatsappMsgBtn = document.getElementById('copyWhatsappMsgBtn');
+    const generatedLink = document.getElementById('generatedLink');
+    const generatedWhatsapp = document.getElementById('generatedWhatsapp');
+    const publicBaseUrl = document.getElementById('publicBaseUrl');
+    const copyBtn = document.getElementById('copyBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const brandTeamName = document.getElementById('brandTeamName');
+    const brandTagline = document.getElementById('brandTagline');
+    const brandEmoji = document.getElementById('brandEmoji');
+    const brandColor = document.getElementById('brandColor');
+    const brandGameTitle = document.getElementById('brandGameTitle');
+    const saveBrandBtn = document.getElementById('saveBrandBtn');
+    const resetBrandBtn = document.getElementById('resetBrandBtn');
+
+    const teamNameTop = document.getElementById('teamNameTop');
+    const teamTaglineTop = document.getElementById('teamTagline');
+    const gameTitleTop = document.getElementById('gameTitle');
+    const brandBadge = document.getElementById('brandBadge');
+    const shareBrandLabel = document.getElementById('shareBrandLabel');
+
+    const keyboardRows = [
+      ['ק','ר','א','ט','ו','ן','ם','פ'],
+      ['ש','ד','ג','כ','ע','י','ח','ל','ך','ף'],
+      ['ז','ס','ב','ה','נ','מ','צ','ת','ץ','Enter','⌫']
+    ];
+
+    let targetWordOriginal = '';
+    let targetWord = '';
+    let guesses = [];
+    let statusesByLetter = {};
+    let gameOver = false;
+    let timerId = null;
+    let startTime = null;
+    let storageKey = '';
+    let gameDate = '';
+
+    const defaultBrand = {
+      teamName: 'שם הצוות שלך',
+      tagline: 'משחק צוות יומי, מהיר וממכר',
+      emoji: '🚀',
+      color: '#5b67ff',
+      gameTitle: 'מילת הבוקר'
+    };
+
+    function normalizeHebrew(text) {
+      return (text || '')
+        .replace(/\s+/g, '')
+        .split('')
+        .map(ch => FINAL_MAP[ch] || ch)
+        .join('');
+    }
+
+    function sanitizeWord(text) {
+      return (text || '').replace(/\s+/g, '').slice(0, WORD_LEN);
+    }
+
+    function formatDateLabel(dateStr) {
+      if (!dateStr) return 'היום';
+      const d = new Date(dateStr + 'T00:00:00');
+      if (isNaN(d)) return dateStr;
+      return d.toLocaleDateString('he-IL');
+    }
+
+    function formatTime(ms) {
+      const total = Math.floor(ms / 1000);
+      const mm = String(Math.floor(total / 60)).padStart(2, '0');
+      const ss = String(total % 60).padStart(2, '0');
+      return `${mm}:${ss}`;
+    }
+
+    function encodeWord(word) {
+      return btoa(unescape(encodeURIComponent(word.split('').reverse().join(''))))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/g, '');
+    }
+
+    function decodeWord(encoded) {
+      try {
+        const padded = encoded.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((encoded.length + 3) % 4);
+        const reversed = decodeURIComponent(escape(atob(padded)));
+        return reversed.split('').reverse().join('');
+      } catch {
+        return '';
+      }
+    }
+
+    function getParams() {
+      const params = new URLSearchParams(location.search);
+      return {
+        w: params.get('w') || '',
+        d: params.get('d') || ''
+      };
+    }
+
+    function getBrand() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(BRAND_KEY) || '{}');
+        return { ...defaultBrand, ...raw };
+      } catch {
+        return { ...defaultBrand };
+      }
+    }
+
+    function getSettings() {
+      try {
+        return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function saveSettings(settings) {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings || {}));
+    }
+
+    function saveBrand() {
+      const brand = {
+        teamName: (brandTeamName.value || '').trim() || defaultBrand.teamName,
+        tagline: (brandTagline.value || '').trim() || defaultBrand.tagline,
+        emoji: (brandEmoji.value || '').trim() || defaultBrand.emoji,
+        color: brandColor.value || defaultBrand.color,
+        gameTitle: (brandGameTitle.value || '').trim() || defaultBrand.gameTitle,
+      };
+      localStorage.setItem(BRAND_KEY, JSON.stringify(brand));
+      applyBrand(brand);
+      setMessage('המיתוג נשמר 👍', true);
+    }
+
+    function resetBrand() {
+      localStorage.removeItem(BRAND_KEY);
+      fillBrandForm(defaultBrand);
+      applyBrand(defaultBrand);
+      setMessage('המיתוג אופס.', true);
+    }
+
+    function fillBrandForm(brand) {
+      brandTeamName.value = brand.teamName || '';
+      brandTagline.value = brand.tagline || '';
+      brandEmoji.value = brand.emoji || '';
+      brandColor.value = brand.color || defaultBrand.color;
+      brandGameTitle.value = brand.gameTitle || '';
+    }
+
+    function shadeColor(hex, amount) {
+      const c = hex.replace('#','');
+      if (!/^([0-9a-f]{6})$/i.test(c)) return hex;
+      const num = parseInt(c, 16);
+      let r = (num >> 16) + amount;
+      let g = ((num >> 8) & 0x00FF) + amount;
+      let b = (num & 0x0000FF) + amount;
+      r = Math.max(Math.min(255, r), 0);
+      g = Math.max(Math.min(255, g), 0);
+      b = Math.max(Math.min(255, b), 0);
+      return '#' + (b | (g << 8) | (r << 16)).toString(16).padStart(6,'0');
+    }
+
+    function applyBrand(brand) {
+      document.documentElement.style.setProperty('--brand', brand.color);
+      document.documentElement.style.setProperty('--brand-soft', shadeColor(brand.color, 215));
+      document.documentElement.style.setProperty('--brand-strong', shadeColor(brand.color, -40));
+      teamNameTop.textContent = brand.teamName;
+      teamTaglineTop.textContent = brand.tagline;
+      gameTitleTop.textContent = brand.gameTitle;
+      brandBadge.textContent = brand.emoji || '🚀';
+      shareBrandLabel.textContent = `${brand.emoji || '🚀'} ${brand.teamName}`;
+      document.title = `${brand.gameTitle} – ${brand.teamName}`;
+    }
+
+    function saveState() {
+      if (!storageKey) return;
+      const data = { guesses, statusesByLetter, gameOver, startTime };
+      localStorage.setItem(storageKey, JSON.stringify(data));
+    }
+
+    function loadState() {
+      if (!storageKey) return;
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        guesses = Array.isArray(data.guesses) ? data.guesses : [];
+        statusesByLetter = data.statusesByLetter || {};
+        gameOver = !!data.gameOver;
+        startTime = data.startTime || Date.now();
+      } catch {}
+    }
+
+    function clearState() {
+      if (storageKey) localStorage.removeItem(storageKey);
+    }
+
+    function buildGrid() {
+      gridEl.innerHTML = '';
+      for (let r = 0; r < MAX_GUESSES; r++) {
+        const guess = guesses[r] || '';
+        const evals = guesses[r] ? evaluateGuess(guesses[r]) : null;
+        for (let c = 0; c < WORD_LEN; c++) {
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          const ch = guess[c] || '';
+          tile.textContent = ch;
+          if (ch) tile.classList.add('filled');
+          if (evals && evals[c]) tile.classList.add(evals[c]);
+          gridEl.appendChild(tile);
+        }
+      }
+    }
+
+    function updateKeyboard() {
+      keyboardEl.innerHTML = '';
+      keyboardRows.forEach(row => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'krow';
+        row.forEach(key => {
+          const btn = document.createElement('button');
+          btn.className = 'key' + ((key === 'Enter' || key === '⌫') ? ' wide' : '');
+          btn.textContent = key === 'Enter' ? 'נחש' : (key === '⌫' ? 'מחיקה' : key);
+          if (statusesByLetter[key]) btn.classList.add(statusesByLetter[key]);
+          btn.addEventListener('click', () => onVirtualKey(key));
+          rowEl.appendChild(btn);
+        });
+        keyboardEl.appendChild(rowEl);
+      });
+    }
+
+    function evaluateGuess(guessOriginal) {
+      const guess = normalizeHebrew(guessOriginal);
+      const target = targetWord;
+      const result = Array(WORD_LEN).fill('absent');
+      const remaining = target.split('');
+
+      for (let i = 0; i < WORD_LEN; i++) {
+        if (guess[i] === target[i]) {
+          result[i] = 'correct';
+          remaining[i] = null;
+        }
+      }
+
+      for (let i = 0; i < WORD_LEN; i++) {
+        if (result[i] === 'correct') continue;
+        const idx = remaining.indexOf(guess[i]);
+        if (idx !== -1) {
+          result[i] = 'present';
+          remaining[idx] = null;
+        }
+      }
+      return result;
+    }
+
+    function mergeStatus(prev, next) {
+      const rank = { absent: 1, present: 2, correct: 3 };
+      return !prev || rank[next] > rank[prev] ? next : prev;
+    }
+
+    function setMessage(text, good = false) {
+      messageEl.textContent = text;
+      messageEl.style.color = good ? '#1d7f39' : '#263246';
+    }
+
+    function finishGame(win) {
+      gameOver = true;
+      stopTimer();
+      saveState();
+      showShareBox(win);
+      guessInput.disabled = true;
+      guessBtn.disabled = true;
+      setMessage(win ? 'יפה מאוד. פיצחתם את מילת הבוקר 👏' : `נגמרו הניחושים. המילה הייתה: ${targetWordOriginal}`, win);
+    }
+
+    function emojiLine(evals) {
+      return evals.map(s => s === 'correct' ? '🟩' : s === 'present' ? '🟨' : '⬜').join('');
+    }
+
+    function showShareBox(win) {
+      const brand = getBrand();
+      const elapsed = formatTime(Date.now() - startTime);
+      const lines = guesses.map(g => emojiLine(evaluateGuess(g)));
+      const header = `${brand.emoji || '🚀'} ${brand.teamName} | ${brand.gameTitle}`;
+      const score = win ? `${guesses.length}/6` : 'X/6';
+      const text = `${header}\n${formatDateLabel(gameDate)}\n${score}\n⏱ ${elapsed}\n${lines.join('\n')}`;
+      shareTextEl.textContent = text;
+      resultBox.classList.add('show');
+    }
+
+    function submitGuess() {
+      if (gameOver || !targetWord) return;
+      let guess = sanitizeWord(guessInput.value);
+      if (!HEBREW_RE.test(guess)) {
+        setMessage('צריך להזין מילה בעברית עם בדיוק 5 אותיות.');
+        return;
+      }
+      if (guesses.length >= MAX_GUESSES) return;
+
+      guesses.push(guess);
+      const evals = evaluateGuess(guess);
+      for (let i = 0; i < WORD_LEN; i++) {
+        const displayChar = guess[i];
+        statusesByLetter[displayChar] = mergeStatus(statusesByLetter[displayChar], evals[i]);
+        const normalizedChar = normalizeHebrew(displayChar);
+        statusesByLetter[normalizedChar] = mergeStatus(statusesByLetter[normalizedChar], evals[i]);
+      }
+
+      guessInput.value = '';
+      guessCountEl.textContent = guesses.length;
+      buildGrid();
+      updateKeyboard();
+      saveState();
+
+      if (normalizeHebrew(guess) === targetWord) return finishGame(true);
+      if (guesses.length >= MAX_GUESSES) return finishGame(false);
+      setMessage('ממשיכים. אתם קרובים.');
+    }
+
+    function onVirtualKey(key) {
+      if (gameOver) return;
+      if (key === 'Enter') return submitGuess();
+      if (key === '⌫') {
+        guessInput.value = guessInput.value.slice(0, -1);
+        return;
+      }
+      if (guessInput.value.length < WORD_LEN) guessInput.value += key;
+      guessInput.focus();
+    }
+
+    function tick() {
+      if (!startTime) return;
+      timerEl.textContent = formatTime(Date.now() - startTime);
+    }
+
+    function startTimer() {
+      stopTimer();
+      if (!startTime) startTime = Date.now();
+      tick();
+      if (!gameOver) timerId = setInterval(tick, 1000);
+    }
+
+    function stopTimer() {
+      if (timerId) clearInterval(timerId);
+      timerId = null;
+    }
+
+    function initAdminDefaults() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      adminDate.value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    function createShareLink() {
+      const brand = getBrand();
+      const word = sanitizeWord(adminWord.value);
+      const date = adminDate.value;
+      if (!HEBREW_RE.test(word)) {
+        alert('יש להזין מילה בעברית עם 5 אותיות בדיוק.');
+        return;
+      }
+      if (!date) {
+        alert('יש לבחור תאריך.');
+        return;
+      }
+      const url = new URL(location.href.split('?')[0]);
+      url.searchParams.set('w', encodeWord(word));
+      url.searchParams.set('d', date);
+      const shareUrl = url.toString();
+      generatedLink.value = shareUrl;
+      generatedWhatsapp.value = `${brand.emoji || '🚀'} בוקר טוב ${brand.teamName}!\n${brand.tagline}\n\nהאתגר של היום: ${brand.gameTitle}\n📅 ${date}\nנחשו את המילה ב-6 ניסיונות או פחות:\n${shareUrl}\n\nבסיום המשחק שלחו לקבוצה את התוצאה שלכם 🎯`;
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        setMessage('הועתק 👍', true);
+      } catch {
+        setMessage('לא הצלחתי להעתיק אוטומטית. אפשר לסמן ולהעתיק ידנית.');
+      }
+    }
+
+    function initGame() {
+      const { w, d } = getParams();
+      gameDate = d || new Date().toISOString().slice(0, 10);
+      gameDateLabel.textContent = formatDateLabel(gameDate);
+
+      if (!w) {
+        setupNotice.textContent = 'כדי להתחיל, פתח את אזור המנהל, שמור מיתוג, בחר מילה, וצור קישור לצוות.';
+        guessInput.disabled = true;
+        guessBtn.disabled = true;
+        buildGrid();
+        updateKeyboard();
+        return;
+      }
+
+      targetWordOriginal = decodeWord(w);
+      targetWordOriginal = sanitizeWord(targetWordOriginal);
+      targetWord = normalizeHebrew(targetWordOriginal);
+      storageKey = `hebrew-wordel::${gameDate}::${w}`;
+
+      if (!HEBREW_RE.test(targetWordOriginal)) {
+        setupNotice.textContent = 'הקישור לא תקין או שהמילה לא בפורמט המתאים.';
+        guessInput.disabled = true;
+        guessBtn.disabled = true;
+        buildGrid();
+        updateKeyboard();
+        return;
+      }
+
+      setupNotice.textContent = 'אפשר לשחק גם מהמקלדת וגם מהכפתורים למטה.';
+      loadState();
+      buildGrid();
+      updateKeyboard();
+      guessCountEl.textContent = guesses.length;
+
+      if (!startTime) startTime = Date.now();
+      if (gameOver) {
+        tick();
+        showShareBox(normalizeHebrew(guesses[guesses.length - 1] || '') === targetWord);
+        guessInput.disabled = true;
+        guessBtn.disabled = true;
+      } else {
+        startTimer();
+      }
+    }
+
+    guessBtn.addEventListener('click', submitGuess);
+    guessInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitGuess(); });
+    guessInput.addEventListener('input', () => {
+      guessInput.value = guessInput.value.replace(/[^\u0590-\u05FF]/g, '').slice(0, WORD_LEN);
+    });
+
+    buildLinkBtn.addEventListener('click', createShareLink);
+    copyLinkBtn.addEventListener('click', () => copyText(generatedLink.value));
+    copyWhatsappMsgBtn.addEventListener('click', () => copyText(generatedWhatsapp.value));
+    copyBtn.addEventListener('click', () => copyText(shareTextEl.textContent));
+    shareBtn.addEventListener('click', async () => {
+      const text = shareTextEl.textContent;
+      if (navigator.share) {
+        try { await navigator.share({ text }); return; } catch {}
+      }
+      copyText(text);
+    });
+    resetBtn.addEventListener('click', () => {
+      if (!confirm('לאפס את המשחק במכשיר הזה ולהתחיל מחדש?')) return;
+      clearState();
+      location.reload();
+    });
+    saveBrandBtn.addEventListener('click', saveBrand);
+    resetBrandBtn.addEventListener('click', resetBrand);
+
+    initAdminDefaults();
+    const brand = getBrand();
+    const settings = getSettings();
+    fillBrandForm(brand);
+    applyBrand(brand);
+    publicBaseUrl.value = settings.publicBaseUrl || ((location.protocol === 'http:' || location.protocol === 'https:') ? location.href.split('?')[0] : '');
+    initGame();
+  </script>
+</body>
+</html>
